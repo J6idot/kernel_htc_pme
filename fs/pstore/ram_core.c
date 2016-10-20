@@ -88,7 +88,8 @@ static size_t buffer_start_add_locked(struct persistent_ram_zone *prz, size_t a)
 	int new;
 	unsigned long flags = 0;
 
-	raw_spin_lock_irqsave(&prz->buffer_lock, flags);
+	if (!(prz->flags & PRZ_FLAG_NO_LOCK))
+		raw_spin_lock_irqsave(&prz->buffer_lock, flags);
 
 	old = atomic_read(&prz->buffer->start);
 	new = old + a;
@@ -96,7 +97,8 @@ static size_t buffer_start_add_locked(struct persistent_ram_zone *prz, size_t a)
 		new -= prz->buffer_size;
 	atomic_set(&prz->buffer->start, new);
 
-	raw_spin_unlock_irqrestore(&prz->buffer_lock, flags);
+	if (!(prz->flags & PRZ_FLAG_NO_LOCK))
+		raw_spin_unlock_irqrestore(&prz->buffer_lock, flags);
 
 	return old;
 }
@@ -108,7 +110,8 @@ static void buffer_size_add_locked(struct persistent_ram_zone *prz, size_t a)
 	size_t new;
 	unsigned long flags = 0;
 
-	raw_spin_lock_irqsave(&prz->buffer_lock, flags);
+	if (!(prz->flags & PRZ_FLAG_NO_LOCK))
+		raw_spin_lock_irqsave(&prz->buffer_lock, flags);
 
 	old = atomic_read(&prz->buffer->size);
 	if (old == prz->buffer_size)
@@ -120,7 +123,8 @@ static void buffer_size_add_locked(struct persistent_ram_zone *prz, size_t a)
 	atomic_set(&prz->buffer->size, new);
 
 exit:
-	raw_spin_unlock_irqrestore(&prz->buffer_lock, flags);
+	if (!(prz->flags & PRZ_FLAG_NO_LOCK))
+		raw_spin_unlock_irqrestore(&prz->buffer_lock, flags);
 }
 
 static size_t (*buffer_start_add)(struct persistent_ram_zone *, size_t) = buffer_start_add_atomic;
@@ -502,7 +506,8 @@ static int persistent_ram_buffer_map(phys_addr_t start, phys_addr_t size,
 }
 
 static int persistent_ram_post_init(struct persistent_ram_zone *prz, u32 sig,
-				    struct persistent_ram_ecc_info *ecc_info)
+				    struct persistent_ram_ecc_info *ecc_info,
+				    unsigned long flags)
 {
 	int ret;
 
@@ -532,6 +537,7 @@ static int persistent_ram_post_init(struct persistent_ram_zone *prz, u32 sig,
 	prz->buffer->sig = sig;
 	persistent_ram_zap(prz);
 	prz->buffer_lock = __RAW_SPIN_LOCK_UNLOCKED(buffer_lock);
+	prz->flags = flags;
 
 	return 0;
 }
@@ -575,7 +581,7 @@ struct persistent_ram_zone *persistent_ram_new(phys_addr_t start, size_t size,
 	if (ret)
 		goto err;
 
-	ret = persistent_ram_post_init(prz, sig, ecc_info);
+	ret = persistent_ram_post_init(prz, sig, ecc_info, flags);
 	if (ret)
 		goto err;
 
