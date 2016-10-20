@@ -31,6 +31,13 @@
  */
 #define PRZ_FLAG_NO_LOCK       BIT(0)
 
+/*
+ * Choose whether access to the RAM zone requires locking or not.  If a zone
+ * can be written to from different CPUs like with ftrace for example, then
+ * PRZ_FLAG_NO_LOCK is used. For all other cases, locking is required.
+ */
+#define PRZ_FLAG_NO_LOCK	BIT(0)
+
 struct persistent_ram_buffer;
 struct rs_control;
 
@@ -47,6 +54,7 @@ struct persistent_ram_zone {
 	void *vaddr;
 	struct persistent_ram_buffer *buffer;
 	size_t buffer_size;
+	u32 flags;
 	raw_spinlock_t buffer_lock;
 
 	/* ECC correction */
