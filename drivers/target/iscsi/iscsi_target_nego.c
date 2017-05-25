@@ -1312,13 +1312,25 @@ int iscsi_target_start_negotiation(
        if (conn->sock) {
                struct sock *sk = conn->sock->sk;
 
-               write_lock_bh(&sk->sk_callback_lock);
-               set_bit(LOGIN_FLAGS_READY, &conn->login_flags);
-               write_unlock_bh(&sk->sk_callback_lock);
-       }
+		write_lock_bh(&sk->sk_callback_lock);
+		set_bit(LOGIN_FLAGS_READY, &conn->login_flags);
+		set_bit(LOGIN_FLAGS_INITIAL_PDU, &conn->login_flags);
+		write_unlock_bh(&sk->sk_callback_lock);
+	}
+	/*
+	 * If iscsi_target_do_login returns zero to signal more PDU
+	 * exchanges are required to complete the login, go ahead and
+	 * clear LOGIN_FLAGS_INITIAL_PDU but only if the TCP connection
+	 * is still active.
+	 *
+	 * Otherwise if TCP connection dropped asynchronously, go ahead
+	 * and perform connection cleanup now.
+	 */
+	ret = iscsi_target_do_login(conn, login);
+	if (!ret && iscsi_target_sk_check_and_clear(conn, LOGIN_FLAGS_INITIAL_PDU))
+		ret = -1;
 
-       ret = iscsi_target_do_login(conn, login);
-       if (ret < 0) {
+	if (ret < 0) {
 		cancel_delayed_work_sync(&conn->login_work);
 		cancel_delayed_work_sync(&conn->login_cleanup_work);
 		iscsi_target_restore_sock_callbacks(conn);
