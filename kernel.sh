@@ -14,5 +14,5 @@ echo -
 echo -
 echo - Making an anykernel compatible zip
 cp $ROOTDIR/out/arch/arm64/boot/Image.gz-dtb ~/HTC/KernelBuilds/AnyKernel/zImage
-bash ~/HTC/KernelBuilds/anykernel.sh
-cd ~/HTC/HTCStock || { echo 'build failed!' ; exit 1; }
+bash ~/HTC/KernelBuilds/anykernel.sh || { echo 'build failed!' ; exit 1; }
+cd ~/HTC/HTCStock
