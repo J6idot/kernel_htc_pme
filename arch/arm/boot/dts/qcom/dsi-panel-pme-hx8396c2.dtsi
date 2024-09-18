@@ -432,7 +432,7 @@
 		compatible = "htc,pme_tianma_hx8396c2_cmd";
 		qcom,mdss-dsi-panel-name = "Perfume WQHD TIANMA HX8396C2 5.2 Dual dsi cmd mode panel";
 		qcom,mdss-dsi-panel-type = "dsi_cmd_mode";
-		qcom,mdss-dsi-panel-framerate = <60>;
+		qcom,mdss-dsi-panel-framerate = <64>;
 		qcom,mdss-dsi-virtual-channel-id = <0>;
 		qcom,mdss-dsi-stream = <0>;
 		qcom,mdss-dsi-panel-width = <720>;
