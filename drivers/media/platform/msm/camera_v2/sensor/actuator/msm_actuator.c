@@ -557,7 +557,6 @@ static int32_t htc_ois_gain_write(struct msm_actuator_ctrl_t *a_ctrl, uint32_t o
 }
 /*HTC_END, HTC_VCM*/
 
-
 static int msm_actuator_bivcm_write_focus(
 	struct msm_actuator_ctrl_t *a_ctrl,
 	uint16_t curr_lens_pos,
@@ -601,11 +600,11 @@ static int msm_actuator_bivcm_write_focus(
 /*HTC_START*/
 	if(a_ctrl->closeloop)
 		rc = lc898214_wrapper_i2c_write(a_ctrl, code_boundary, sign_direction, wait_time);
-	else
+	else {
 /*HTC_END*/
 		rc = msm_actuator_bivcm_handle_i2c_ops(a_ctrl,
 			code_boundary, damping_params->hw_params, wait_time);
-
+	}
 		if (rc < 0) {
 			pr_err("%s:%d msm_actuator_bivcm_handle_i2c_ops failed\n",
 				__func__, __LINE__);
@@ -617,15 +616,17 @@ static int msm_actuator_bivcm_write_focus(
 }
 
 static int32_t msm_actuator_piezo_move_focus(
-	struct msm_actuator_ctrl_t *a_ctrl,
-	struct msm_actuator_move_params_t *move_params)
+        struct msm_actuator_ctrl_t *a_ctrl,
+        struct msm_actuator_move_params_t *move_params)
 {
-	int32_t dest_step_position = move_params->dest_step_pos;
-	struct damping_params_t ringing_params_kernel;
-	int32_t rc = 0;
-	int32_t num_steps = move_params->num_steps;
-	struct msm_camera_i2c_reg_setting reg_setting;
-	CDBG("Enter\n");
+
+        int32_t dest_step_position = move_params->dest_step_pos;
+        struct damping_params_t ringing_params_kernel;
+        int32_t rc = 0;
+        int32_t num_steps = move_params->num_steps;
+        struct msm_camera_i2c_reg_setting reg_setting;
+	
+        CDBG("Enter\n");
 
 	if (copy_from_user(&ringing_params_kernel,
 		&(move_params->ringing_params[0]),

@@ -70,11 +70,12 @@ static void init_from_device_tree(void)
     int property_size = 0;
 
     misc_node = of_find_node_by_path(DEVICE_TREE_MISC_PATH);
-    if(NULL == misc_node)
+    if(NULL == misc_node) {
         return;
+    }
 
 	data = (char *)of_get_property(misc_node, LABEL_MSM_SERIAL_NUM, &property_size);
-	SECMSG("%s - length: %d\n", __func__, property_size);
+
 	if(property_size > sizeof(htc_msm_serial_num))
 		return;
 

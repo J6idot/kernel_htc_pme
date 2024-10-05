@@ -623,10 +623,11 @@ static int mobicore_probe(struct platform_device *pdev)
 	 * the driver
 	 */
 	err = device_admin_init();
-	if (err)
+	if (err) {
 		goto fail_creat_dev_admin;
 
 		return 0;
+	}
 
 fail_creat_dev_admin:
 	mc_scheduler_exit();

@@ -914,11 +914,12 @@ static int projector2_function_set_alt(struct usb_function *f,
 
 #if HSML_VERSION_12
 /*++ 2015/04/10, USB Team, PCN00076 ++*/
-    if (dev->ep_out)
+    if (dev->ep_out) {
 /*-- 2015/04/10, USB Team, PCN00076 --*/
 #endif
 /*-- 2015/04/10, USB Team, PCN00075 --*/
         projector2_queue_out(dev);
+    }
 
 	return 0;
 }
